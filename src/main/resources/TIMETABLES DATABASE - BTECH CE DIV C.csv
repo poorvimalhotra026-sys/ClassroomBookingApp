@@ -1,0 +1,11 @@
+Time,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday
+08:00 - 09:00,MPMC (Lab),—,—,MPMC (Lab),—,OOPJ (LAB)
+09:00 - 10:00,MPMC (Lab),TCS (TR-601),—,MPMC (Lab) / TCS (CR-405),,OOPJ (LAB)
+10:00 - 11:00,BREAK,DAA (Lab) / WP (Lab),WP (Lab),BREAK,WP (CR-504),—
+11:00 - 12:00,MPMC (CR-504),DAA (Lab) / WP (Lab),WP (Lab) / CVT(CR-401),MPMC (CR-504),WP (CR-504),—
+12:00 - 01:00,TCS (CR-504),BREAK,DBMS (CR-403),MPMC (CR-504),BREAK,OOPJ (LAB)
+01:00 - 02:00,TCS (CR-504),CVT (CR-504),DAA (CR-401),CVT (CR-403),CVT (CR-401),OOPJ (LAB)
+02:00 - 03:00,MPMC (Lab),DBMS (CR-504),—,CVT (CR-403),DAA (LAB) / DBMS (LAB),—
+03:00 - 04:00,DBMS (Lab),DAA (CR-504),—,—,DAA (LAB) / DBMS (LAB),—
+04:00 - 05:00,—,COA (CR-503),—,—,COA (CR-103),—
+05:00 - 06:00,—,—,—,—,COA (CR-103),—

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NMIMS Admin | Master Control Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 1. MASTER DARK THEME */
+        body {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+            padding: 25px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .box {
+            background-color: #0a0a0a !important;
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        /* 2. TABLE STRUCTURE - DARK BASE */
+        .matrix-table {
+            background-color: #111111 !important;
+            color: #ffffff !important;
+            border-collapse: separate;
+            width: 100%;
+        }
+
+        /* General Cell Style - Charcoal */
+        .matrix-table td, .matrix-table th {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+            border: 1px solid #333 !important;
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* 3. THE FIX: HIGH-SPECIFICITY STATUS COLORS */
+        /* We target 'td.yes' specifically to override the general 'td' background */
+        .matrix-table td.yes {
+            background-color: #d32f2f !important; /* Bright Red */
+            color: #ffffff !important;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .matrix-table td.no {
+            background-color: #388e3c !important; /* Bright Green */
+            color: #ffffff !important;
+            font-weight: normal;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* 4. HEADERS - DEEP NAVY */
+        .matrix-table thead th {
+            background-color: #0d47a1 !important; /* Deep Blue */
+            color: #ffffff !important;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        /* STICKY ROOM COLUMN */
+        .room-col {
+            background-color: #212121 !important;
+            color: #2196f3 !important; /* Electric Blue */
+            font-weight: bold;
+            text-align: left !important;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            border-right: 3px solid #2196f3 !important;
+        }
+
+        /* 5. FORM INPUTS */
+        input, select {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-weight: bold !important;
+        }
+
+        .text-primary { color: #2196f3 !important; }
+        .text-success { color: #4caf50 !important; }
+    </style>
+</head>
+<body class="container-fluid">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-primary fw-bold mb-0">NMIMS MPSTME ADMIN</h2>
+        <p class="text-secondary small">Master Occupancy Matrix</p>
+    </div>
+    <a href="/logout" class="btn btn-outline-danger btn-sm">LOGOUT</a>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="box h-100">
+            <h5 class="text-success fw-bold">Queue</h5>
+            <table class="table table-dark table-sm">
+                <tbody>
+                <tr th:each="q : ${queue}">
+                    <td th:text="${q.requestType == 'COMMITTEE' ? q.eventName : q.batchName}"></td>
+                    <td>
+                        <form th:action="@{'/bookings/admin/allot/' + ${q.id}}" method="post" class="d-flex gap-1">
+                            <input type="text" name="roomNumber" class="form-control form-control-sm" style="width:50px;" required>
+                            <button class="btn btn-success btn-sm">OK</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="box h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0" th:text="'Live Grid: ' + ${selectedDay}"></h5>
+                <form action="/bookings/admin/dashboard" method="get" class="d-flex gap-2">
+                    <input type="date" name="viewDate" class="form-control form-control-sm" th:value="${selectedDate}">
+                    <button class="btn btn-primary btn-sm">REFRESH</button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table matrix-table">
+                    <thead>
+                    <tr>
+                        <th class="room-col">Room</th>
+                        <th th:each="time : ${times}" th:text="${time}"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${matrix}">
+                        <td class="room-col" th:text="${entry.key}"></td>
+                        <td th:each="time : ${times}"
+                            th:text="${entry.value.get(time)}"
+                            th:classappend="${entry.value.get(time) == 'Yes'} ? 'yes' : 'no'">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="box">
+            <h5 class="text-info fw-bold">History Log</h5>
+            <table class="table matrix-table" style="font-size: 0.8rem;">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Requester</th>
+                    <th>Status</th>
+                    <th>Venue</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="h : ${history}">
+                    <td th:text="${h.submissionDate}"></td>
+                    <td th:text="${h.requesterEmail}"></td>
+                    <td th:text="${h.status}"></td>
+                    <td th:text="${h.allottedRoomNumber}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #000; color: #fff; padding: 25px; }
+        .box { background: #111; border: 1px solid #444; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        label { color: #0d6efd; font-weight: bold; }
+        input, select { background: #fff !important; color: #000 !important; font-weight: bold !important; }
+        .table { color: #fff !important; font-size: 0.85rem; }
+        .matrix-table { color: #ffffff !important; text-align: center; font-size: 0.7rem; }
+        .matrix-table th, .matrix-table td { color: #000000 !important; border: 1px solid #000; }
+        .yes { background: #dc3545 !important; font-weight: bold; } /* Occupied */
+        .no { background: #198754 !important; } /* Vacant */
+        .room-col { background: #fff !important; font-weight: bold; text-align: left; position: sticky; left: 0; color: #0d6efd !important; }
+    </style>
+</head>
+<body class="container-fluid">
+<div class="d-flex justify-content-between mb-4">
+    <h2>Teacher Portal: <span th:text="${user.name}"></span></h2>
+    <a href="/logout" class="btn btn-danger">LOGOUT</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="box">
+            <h4 class="text-primary mb-3">Relationship 1: Committee Approvals</h4>
+            <table class="table">
+                <thead><tr><th>Event</th><th>Date</th><th>Action</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${requests}" th:if="${r.requestType == 'COMMITTEE' && r.status == 'PENDING_TEACHER'}">
+                    <td th:text="${r.eventName}"></td>
+                    <td th:text="${r.eventDate}"></td>
+                    <td>
+                        <form th:action="@{'/bookings/teacher/approve/' + ${r.id}}" method="post">
+                            <button class="btn btn-success btn-sm">APPROVE</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="box">
+            <h4 class="text-info mb-3">Relationship 2: Lecture Management</h4>
+            <form th:action="@{/bookings/teacher/lecture-adjustment}" method="post" class="row g-2">
+                <div class="col-12"><label>Lecture to Cancel (Day | Time | Room)</label><input type="text" name="originalLectureDetails" class="form-control" placeholder="Monday | 9:00-10:00 | 402" required></div>
+                <div class="col-md-6"><label>Batch</label><select name="batchName" class="form-select"><option value="BTECH DIV B">Div B</option><option value="BTECH DIV C">Div C</option></select></div>
+                <div class="col-md-6"><label>Action</label><select name="adjustmentType" class="form-select"><option value="CANCEL_AND_RESCHEDULE">Reschedule</option><option value="CANCEL_ONLY">Cancel Only</option></select></div>
+                <div class="col-md-6"><label>New Date</label><input type="date" name="eventDate" class="form-control"></div>
+                <div class="col-md-6"><label>New Time</label><input type="text" name="timeSlot" class="form-control" placeholder="11:00-12:00"></div>
+                <button class="btn btn-info mt-3">SUBMIT TO ADMIN</button>
+            </form>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="box">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-warning fw-bold">Live Occupancy Insight (View Only)</h4>
+                    <form action="/bookings/teacher/dashboard" method="get" class="d-flex gap-2">
+                        <input type="date" name="viewDate" class="form-control form-control-sm" th:value="${selectedDate}">
+                        <button class="btn btn-outline-warning btn-sm">Check Date</button>
+                    </form>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered matrix-table">
+                        <thead>
+                        <tr>
+                            <th class="room-col">Room / Time</th>
+                            <th th:each="time : ${times}" th:text="${time}"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="entry : ${matrix}">
+                            <td class="room-col" th:text="${entry.key}"></td>
+                            <td th:each="time : ${times}"
+                                th:text="${entry.value.get(time)}"
+                                th:classappend="${entry.value.get(time) == 'Yes'} ? 'yes' : 'no'">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-secondary mt-2">* Use this grid to find vacant slots before submitting a lecture adjustment.</p>
+            </div>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Event</th>
+            <th>Submission Date</th>
+            <th>Current Status</th>
+            <th>Details Received (Room/Remark)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="req : ${requests}">
+            <td th:text="${req.eventName}"></td>
+            <td th:text="${req.submissionDate}"></td>
+            <td th:text="${req.status}"></td>
+            <td class="text-warning">
+                <span th:if="${req.allottedRoomNumber != null}" th:text="'Allotted: ' + ${req.allottedRoomNumber}"></span>
+                <span th:if="${req.rejectionReason != null}" th:text="'Feedback: ' + ${req.rejectionReason}"></span>
+                <span th:if="${req.allottedRoomNumber == null && req.rejectionReason == null}">Processing...</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
